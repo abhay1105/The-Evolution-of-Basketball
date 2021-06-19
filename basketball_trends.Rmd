@@ -14,6 +14,9 @@ library(dplyr)
 sqlite <- dbDriver("SQLite")
 basketball_database <- dbConnect(sqlite, "basketball_data/basketball.sqlite")
 games_data <- tbl(basketball_database, "Game")
+team_salary_data <- tbl(basketball_database, "Team_Salary")
+player_salary_data <- tbl(basketball_database, "Player_Salary")
+player_data <- tbl(basketball_database, "Player")
 
 ```
 
@@ -37,3 +40,14 @@ three_point_data <- games_data %>%
 
 three_point_data
 ```
+
+```{r, include=TRUE, echo=FALSE}
+current_player_salary_data <- player_salary_data %>% 
+  filter(slugSeason == "2020-21") %>% 
+  select(slugSeason, value, nameTeam, namePlayer) %>% 
+  ggplot(mapping = aes(value)) + 
+  geom_density()
+
+current_player_salary_data
+```
+
