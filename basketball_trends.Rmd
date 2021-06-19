@@ -10,6 +10,11 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(RSQLite)
 library(dplyr)
+library(sf)
+library(rnaturalearth)
+library(rnaturalearthdata)
+
+world <- ne_countries(scale = "medium", returnclass = "sf")
 
 sqlite <- dbDriver("SQLite")
 basketball_database <- dbConnect(sqlite, "basketball_data/basketball.sqlite")
@@ -17,6 +22,8 @@ games_data <- tbl(basketball_database, "Game")
 team_salary_data <- tbl(basketball_database, "Team_Salary")
 player_salary_data <- tbl(basketball_database, "Player_Salary")
 player_data <- tbl(basketball_database, "Player")
+
+player_map_data <- read.csv("players_map.csv")
 
 ```
 
@@ -40,6 +47,21 @@ three_point_data <- games_data %>%
 
 three_point_data
 ```
+
+```{r, include=TRUE, echo=FALSE}
+player_birthplace_data <- player_map_data %>% 
+  select(birthPlace) %>% 
+  drop_na(birthPlace) %>% 
+  mutate(birthPlace = as.factor(birthPlace)) %>% 
+  group_by(birthPlace) %>% 
+  summarize(total = n())
+  
+ggplot(data = player_birthplace_data) + 
+  geom_sf(aes(fill = birthPlace))
+  
+player_birthplace_data
+```
+
 
 ```{r, include=TRUE, echo=FALSE}
 current_player_salary_data <- player_salary_data %>% 
