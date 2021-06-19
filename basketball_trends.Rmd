@@ -1,0 +1,39 @@
+---
+title: "The Evolution of Basketball"
+author: "Abhay Paidipalli"
+date: "June 2021"
+output: html_document
+---
+
+```{r setup, include=FALSE, echo=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(RSQLite)
+library(dplyr)
+
+sqlite <- dbDriver("SQLite")
+basketball_database <- dbConnect(sqlite, "basketball_data/basketball.sqlite")
+games_data <- tbl(basketball_database, "Game")
+
+```
+
+
+```{r, include=TRUE, echo=FALSE}
+three_point_data <- games_data %>% 
+  select(GAME_DATE, FG3M_HOME, PTS_HOME) %>%
+  mutate(YEAR = as.double(str_sub(GAME_DATE, 1, 4))) %>% 
+  filter(FG3M_HOME != "<NA>" && YEAR >= 1979) %>% 
+  mutate(FG3M_HOME = as.double(FG3M_HOME)) %>% 
+  mutate(PTS_PCT_3P = (FG3M_HOME * 3) / PTS_HOME) %>% 
+  ggplot(mapping = aes(YEAR, PTS_PCT_3P)) + 
+  geom_jitter(alpha = 0.1, width = 2, color = "lightblue") + 
+  geom_smooth(method = "gam", formula = y ~ s(x, bs = "cs"), se = TRUE) + 
+  theme_dark() + 
+  labs(title = "Percentage of Points from 3-Pointers by Home Teams Over Time",
+       subtitle = "The positive trend indicates that home teams have been more likely to get points from \nthree-point shots as time goes on",
+       x = "Year (1979 to 2021)",
+       y = "% of Points from 3-Pointers",
+       caption = "Source: NBA Advanced Stats (Updated 2021)")
+
+three_point_data
+```
