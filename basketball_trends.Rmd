@@ -9,6 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(RSQLite)
+library(rgeos)
 library(dplyr)
 library(sf)
 library(rnaturalearth)
@@ -24,6 +25,7 @@ player_salary_data <- tbl(basketball_database, "Player_Salary")
 player_data <- tbl(basketball_database, "Player")
 
 player_map_data <- read.csv("players_map.csv")
+sports_league_revenue_data <- read.csv("sportsLeagueRevenue/Data-Table 1.csv")
 
 ```
 
@@ -40,15 +42,48 @@ three_point_data <- games_data %>%
   geom_smooth(method = "gam", formula = y ~ s(x, bs = "cs"), se = TRUE) + 
   theme_dark() + 
   labs(title = "Percentage of Points from 3-Pointers by Home Teams Over Time",
-       subtitle = "The positive trend indicates that home teams have been more likely to get points from \nthree-point shots as time goes on",
+       subtitle = "The positive trend indicates that home teams have been more likely to get points from \nthree-point shots since the introduction of the 3-point line in 1979",
        x = "Year (1979 to 2021)",
        y = "% of Points from 3-Pointers",
-       caption = "Source: NBA Advanced Stats (Updated 2021)")
+       caption = "Source: NBA Advanced Stats (2021)")
 
 three_point_data
 ```
 
+```{r, include=TRUE, echo=FALSE, out.width="90%"}
+sports_league_revenue_clean <- sports_league_revenue_data %>% 
+  select(X.2, X.3, X.4, X.5) %>% 
+  rename(NFL = "X.2") %>% 
+  rename(MLB = "X.3") %>% 
+  rename(NBA = "X.4") %>% 
+  rename(NHL = "X.5") %>% 
+  slice(5:18) %>% 
+  mutate(Year = 1:n() + 2006) %>% 
+  pivot_longer(names_to = "League",
+               values_to = "Revenue",
+               cols = -Year) %>% 
+  mutate(Revenue = as.double(Revenue)) %>% 
+  ggplot(mapping = aes(Year, Revenue, color = League)) + 
+  geom_line() + 
+  theme_classic() + 
+  scale_color_discrete(name = "League", labels = c("Major League Baseball",
+                                                   "National Basketball Association",
+                                                   "National Football League",
+                                                   "National Hockey League")) + 
+  labs(title = "Average Franchise Value of Major American Sports Leagues Over Time",
+       subtitle = "With the recent overtake of the MLB, it is easy to see how the valuation of the NBA has \nrisen significantly since 2007",
+       x = "Year (2007 to 2020)",
+       y = "Average Franchise Value in Millions (USD)",
+       caption = "Source: Statista; Forbes (2021)")
+
+
+sports_league_revenue_clean
+```
+
+
 ```{r, include=TRUE, echo=FALSE}
+
+```
 player_birthplace_data <- player_map_data %>% 
   select(birthPlace) %>% 
   drop_na(birthPlace) %>% 
@@ -60,8 +95,6 @@ ggplot(data = player_birthplace_data) +
   geom_sf(aes(fill = birthPlace))
   
 player_birthplace_data
-```
-
 
 ```{r, include=TRUE, echo=FALSE}
 current_player_salary_data <- player_salary_data %>% 
