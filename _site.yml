@@ -1,0 +1,12 @@
+name: "."
+title: "The Evolution of Basketball"
+description: |
+  The Evolution of Basketball
+output_dir: "docs"
+navbar:
+  right:
+    - text: "Home"
+      href: index.html
+    - text: "About"
+      href: about.html
+output: distill::distill_article

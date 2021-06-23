@@ -1,12 +1,19 @@
 ---
 title: "The Evolution of Basketball"
-author: "Abhay Paidipalli"
-date: "June 2021"
-output: html_document
+description: |
+  An analysis about the noticeable trends in the history of basketball...
+site: distill::distill_website
 ---
 
-```{r setup, include=FALSE, echo=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+# Learn more about creating websites with Distill at:
+# https://rstudio.github.io/distill/website.html
+
+# Learn more about publishing to GitHub Pages at:
+# https://rstudio.github.io/distill/publish_website.html#github-pages
+
 library(tidyverse)
 library(RSQLite)
 library(rgeos)
@@ -31,7 +38,6 @@ draft_combine_data <- tbl(basketball_database, "Draft_Combine")
 player_map_data <- read.csv("players_map.csv")
 sports_league_revenue_data <- read.csv("sportsLeagueRevenue/Data-Table 1.csv")
 league_averages_data <- read.csv("league_averages.csv")
-
 
 ```
 
