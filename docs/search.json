@@ -6,15 +6,15 @@
       "description": "Some additional details about the website",
       "author": [],
       "contents": "\n\n\n\n",
-      "last_modified": "2021-06-23T19:24:40-05:00"
+      "last_modified": "2021-06-23T19:39:45-05:00"
     },
     {
       "path": "index.html",
       "title": "The Evolution of Basketball",
       "description": "An analysis about the noticeable trends in the history of basketball...\n",
       "author": [],
-      "contents": "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nplayer_birthplace_data <- player_map_data %>% select(birthPlace) %>% drop_na(birthPlace) %>% mutate(birthPlace = as.factor(birthPlace)) %>% group_by(birthPlace) %>% summarize(total = n())\nggplot(data = player_birthplace_data) + geom_sf(aes(fill = birthPlace))\nplayer_birthplace_data\n\n\n\n\n\n\n",
-      "last_modified": "2021-06-23T19:24:54-05:00"
+      "contents": "\n\n\n\n\n\n\nWe can see from the graph that there has been a slight decline in offensive rebound rates over time; however, from earlier, we also know there has been an increase in the percentage of points home teams have gained through three-pointers. Therefore, it is plausible that the decrease in offensive rebounds is due to increased floor stretching caused by the increase in three-point play schema.\n\n\n\n\n\n\n\n\n\nplayer_birthplace_data <- player_map_data %>% select(birthPlace) %>% drop_na(birthPlace) %>% mutate(birthPlace = as.factor(birthPlace)) %>% group_by(birthPlace) %>% summarize(total = n())\nggplot(data = player_birthplace_data) + geom_sf(aes(fill = birthPlace))\nplayer_birthplace_data\n\n\n\n\n\n\n",
+      "last_modified": "2021-06-23T19:39:57-05:00"
     }
   ],
   "collections": []

@@ -95,7 +95,7 @@ league_averages_rebounds <- league_averages_data %>%
 
 league_averages_rebounds
 ```
-
+We can see from the graph that there has been a slight decline in offensive rebound rates over time; however, from earlier, we also know there has been an increase in the percentage of points home teams have gained through three-pointers. Therefore, it is plausible that the decrease in offensive rebounds is due to increased floor stretching caused by the increase in three-point play schema.
 
 ```{r, include=TRUE, echo=FALSE}
 three_point_data <- games_data %>% 
