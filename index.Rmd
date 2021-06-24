@@ -3,10 +3,15 @@ title: "The Evolution of Basketball"
 description: |
   An analysis about the noticeable trends in the history of basketball...
 site: distill::distill_website
+author:
+  - name: Abhay Paidipalli
+    url: 
+date: 'June 23rd 2021'
+output: distill::distill_article
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = FALSE, fig.width = 14, fig.height = 7)
 
 # Learn more about creating websites with Distill at:
 # https://rstudio.github.io/distill/website.html
@@ -17,6 +22,9 @@ knitr::opts_chunk$set(echo = FALSE)
 library(tidyverse)
 library(RSQLite)
 library(rgeos)
+library(magrittr)
+library(ggmap)
+library(stringr)
 library(dplyr)
 library(sf)
 library(rvest)
@@ -25,8 +33,6 @@ library(rnaturalearth)
 library(rnaturalearthdata)
 library(ggthemes)
 
-world <- ne_countries(scale = "medium", returnclass = "sf")
-
 sqlite <- dbDriver("SQLite")
 basketball_database <- dbConnect(sqlite, "basketball_data/basketball.sqlite")
 games_data <- tbl(basketball_database, "Game")
@@ -34,12 +40,18 @@ team_salary_data <- tbl(basketball_database, "Team_Salary")
 player_salary_data <- tbl(basketball_database, "Player_Salary")
 player_data <- tbl(basketball_database, "Player")
 draft_combine_data <- tbl(basketball_database, "Draft_Combine")
+team_data <- tbl(basketball_database, "Team")
 
 player_map_data <- read.csv("players_map.csv")
 sports_league_revenue_data <- read.csv("sportsLeagueRevenue/Data-Table 1.csv")
 league_averages_data <- read.csv("league_averages.csv")
+nba_team_records_data <- read.csv("nba_team_records.csv")
 
 ```
+
+The Popularity of the Sport
+
+Let's first start by taking a look at the overall popularity of the sport of basketball itself. An easy way for us to do this would be by analyzing some of the viewership statistics. Below, we have a graph that depicts the viewership in millions for the NBA Finals series. It is evident that the viewership reached its peak for the NBA Finals series during the Michael Jordan era of basketball. After that, the viewership declined heavily; however, it looks to be back on the rise again.
 
 ```{r, include=TRUE, echo=FALSE}
 nba_viewership_clean <- read_html("https://en.wikipedia.org/wiki/NBA_Finals_television_ratings") %>% 
@@ -50,72 +62,77 @@ nba_viewership_clean <- read_html("https://en.wikipedia.org/wiki/NBA_Finals_tele
   mutate(value = str_replace_all(value, "\n", ""),
          value = str_replace_all(value, "\t", "")) %>% 
   mutate(year = as.double(str_sub(value, 1, 4)),
-         network = str_sub(value, 5, 7),
+         Network = str_sub(value, 5, 7),
          value = str_sub(value, 8, str_length(value))) %>% 
   mutate(viewership = as.character(stringr::str_extract(string = value,
                                                pattern = "(?<=\\().*(?=\\))"))) %>% 
   mutate(viewership = as.double(str_sub(viewership, 1, 4))) %>% 
-  ggplot(mapping = aes(year, viewership, color = network)) +
-  geom_line() + 
+  ggplot(mapping = aes(year, viewership, fill = Network)) +
+  geom_col() + 
   theme_economist() + 
+  xlab("\nYear (1987 to 2018)") + 
+  ylab("Average Viewership in Millions\n") + 
   labs(title = "Average Viewership for NBA Finals Series Over Time",
-       subtitle = "put subtitle here",
-       x = "Year (1987 to 2018)",
-       y = "Average Viewership in Millions",
+       subtitle = "The viewership was at its peak during the Michael Jordan era, which occurred during the 1990s",
        caption = "Source: Wikipedia (2021)")
 
 # 1987-2020 is what we want
 nba_viewership_clean
+
 ```
 
+Moving on, we should also take a look at the reach basketball has on the entire globe. This is important since basketball was only created in 1891, which is pretty late considering other sports like soccer have been around in some fashion since as far back as 2500 BC. Nonetheless, the visualization below allows us to judge this by showing us where the players of the NBA have come from.
+
 ```{r, include=TRUE, echo=FALSE}
-league_averages_rebounds <- league_averages_data %>% 
-  rename(Season = "X.1") %>% 
-  rename(ORB = "X.14") %>% 
-  rename(DRB = "X.15") %>% 
-  rename(TRB = "X.16") %>% 
-  select(Season, ORB, DRB, TRB) %>% 
-  slice(2:76) %>% 
-  mutate(Season = as.double(str_sub(Season, 1, 4)),
-         ORB = as.double(ORB),
-         DRB = as.double(DRB),
-         TRB = as.double(TRB)) %>% 
-  drop_na(Season, ORB, DRB, TRB) %>% 
-  pivot_longer(names_to = "rebound_rate",
-               values_to = "rpg",
-               cols = -Season) %>% 
-  ggplot(mapping = aes(Season, rpg, color = rebound_rate)) + 
-  geom_line() + 
-  theme_minimal() + 
-  labs(title = "Different Average League Rebound Rates Over Time",
+player_birthplace_data <- player_map_data %>% 
+  select(birthPlace) %>% 
+  drop_na(birthPlace) %>% 
+  filter(birthPlace != "") %>% 
+  mutate(birthPlace = str_extract(birthPlace, '\\b[^,]+$')) %>% 
+  mutate(birthPlace = ifelse(birthPlace %in% state.name, "USA", birthPlace)) %>% 
+  mutate(birthPlace = ifelse(birthPlace == "United Kingdom", "UK", birthPlace)) %>% 
+  mutate(birthPlace = as.factor(birthPlace)) %>% 
+  group_by(birthPlace) %>% 
+  summarize(total = n())
+
+# test <- player_birthplace_data %>% 
+#   slice_sample(n = 20)
+
+# View(test)
+
+map.world <- map_data("world")
+map.world_joined <- left_join(map.world, player_birthplace_data, by = c("region" = "birthPlace")) %>% 
+  mutate(fill_flg = ifelse(total == 0, FALSE, TRUE))
+
+# df.country_points <- data.frame(country = c("Singapore","Luxembourg"),stringsAsFactors = F)
+# geocode.country_points <- geocode(df.country_points$country)
+# df.country_points <- cbind(df.country_points,geocode.country_points)
+
+world_nationality_plot <- ggplot() +
+  geom_polygon(data = map.world_joined, aes(x = long, y = lat, group = group, fill = total)) +
+#  scale_fill_manual(values = c("#CCCCCC","#e60000")) +
+  labs(title = 'Birthplace of NBA Players',
        subtitle = "put subtitle here",
-       x = "Season",
-       y = "Average Rebounds Per Game",
-       caption = "Source: Basketball Reference (2021)")
+       caption = "Source: NBA Advanced Stats (2021)") +
+  theme(text = element_text(family = "Gill Sans", color = "#FFFFFF")
+        ,panel.background = element_rect(fill = "#444444")
+        ,plot.background = element_rect(fill = "#444444")
+        ,panel.grid = element_blank()
+        ,plot.title = element_text(size = 30)
+        ,plot.subtitle = element_text(size = 10)
+        ,axis.text = element_blank()
+        ,axis.title = element_blank()
+        ,axis.ticks = element_blank()
+#        ,legend.position = "none"
+        )
+  
+player_birthplace_data
+head(map.world)
+world_nationality_plot
 
-league_averages_rebounds
 ```
-We can see from the graph that there has been a slight decline in offensive rebound rates over time; however, from earlier, we also know there has been an increase in the percentage of points home teams have gained through three-pointers. Therefore, it is plausible that the decrease in offensive rebounds is due to increased floor stretching caused by the increase in three-point play schema.
 
-```{r, include=TRUE, echo=FALSE}
-three_point_data <- games_data %>% 
-  select(GAME_DATE, FG3M_HOME, PTS_HOME) %>%
-  mutate(YEAR = as.double(str_sub(GAME_DATE, 1, 4))) %>% 
-  filter(FG3M_HOME != "<NA>" && YEAR >= 1979) %>% 
-  mutate(FG3M_HOME = as.double(FG3M_HOME)) %>% 
-  mutate(PTS_PCT_3P = (FG3M_HOME * 3) / PTS_HOME) %>% 
-  ggplot(mapping = aes(YEAR, PTS_PCT_3P)) + 
-  geom_jitter(alpha = 0.1, width = 2, color = "lightblue") + 
-  geom_smooth(method = "gam", formula = y ~ s(x, bs = "cs"), se = TRUE) + 
-  theme_dark() + 
-  labs(title = "Percentage of Points from 3-Pointers by Home Teams Over Time",
-       subtitle = "The positive trend indicates that home teams have been more likely to get points from \nthree-point shots since the introduction of the 3-point line in 1979",
-       x = "Year (1979 to 2021)",
-       y = "% of Points from 3-Pointers",
-       caption = "Source: NBA Advanced Stats (2021)")
-
-three_point_data
-```
+Another very important factor when considering the popularity of a sport is its financial value. Since sports are part of the entertainment industry, one of the most telling ways for us to determine its success is to analyze the amount of value they hold. As we can see, the graphic below shows us that although the NBA may not currently be the league with the highest average franchise value, they are one of the leagues with the highest increases, which is a good sign for the future. There are other non-American leagues to consider as well, but for the sake of this analysis will focus more towards the American sports leagues.
 
 ```{r, include=TRUE, echo=FALSE, out.width="90%"}
 sports_league_revenue_clean <- sports_league_revenue_data %>% 
@@ -133,35 +150,123 @@ sports_league_revenue_clean <- sports_league_revenue_data %>%
   ggplot(mapping = aes(Year, Revenue, color = League)) + 
   geom_line() + 
   theme_classic() + 
-  scale_color_discrete(name = "League", labels = c("Major League Baseball",
-                                                   "National Basketball Association",
-                                                   "National Football League",
-                                                   "National Hockey League")) + 
+  scale_color_discrete(name = "League", labels = c("Major League Baseball (MLB)",
+                                                   "National Basketball Association (NBA)",
+                                                   "National Football League (NFL)",
+                                                   "National Hockey League (NHL)")) + 
   labs(title = "Average Franchise Value of Major American Sports Leagues Over Time",
        subtitle = "With the recent overtake of the MLB, it is easy to see how the valuation of the NBA has \nrisen significantly since 2007",
        x = "Year (2007 to 2020)",
        y = "Average Franchise Value in Millions (USD)",
        caption = "Source: Statista; Forbes (2021)")
 
-
 sports_league_revenue_clean
+
 ```
 
+Statistics of the Game
 
 ```{r, include=TRUE, echo=FALSE}
+three_point_data <- games_data %>% 
+  select(GAME_DATE, FG3M_HOME, PTS_HOME) %>%
+  mutate(YEAR = as.double(str_sub(GAME_DATE, 1, 4))) %>% 
+  filter(FG3M_HOME != "<NA>" && YEAR >= 1979) %>% 
+  mutate(FG3M_HOME = as.double(FG3M_HOME)) %>% 
+  mutate(PTS_PCT_3P = (FG3M_HOME * 3) / PTS_HOME) %>% 
+  ggplot(mapping = aes(YEAR, PTS_PCT_3P)) + 
+  geom_jitter(alpha = 0.1, width = 2, color = "lightblue") + 
+  geom_smooth(method = "gam", formula = y ~ s(x, bs = "cs"), se = TRUE) + 
+  scale_y_continuous(labels = scales::percent) +
+  theme_dark() + 
+  labs(title = "Percentage of Points from 3-Pointers by Home Teams Over Time",
+       subtitle = "The positive trend indicates that home teams have been more likely to get points from \nthree-point shots since the introduction of the 3-point line in 1979",
+       x = "Year (1979 to 2021)",
+       y = "% of Points from 3-Pointers",
+       caption = "Source: NBA Advanced Stats (2021)")
+
+three_point_data
 
 ```
-player_birthplace_data <- player_map_data %>% 
-  select(birthPlace) %>% 
-  drop_na(birthPlace) %>% 
-  mutate(birthPlace = as.factor(birthPlace)) %>% 
-  group_by(birthPlace) %>% 
-  summarize(total = n())
+
+One of the main things that fans mention when asked about some of the biggest advancements in basketball is the evolution of the three-point line. Introduced in 1979, the three-point line has provided players an opportunity to make more points for a made shot than the standard two-point. Since then, the implementation of this three-point line into the gameplan of coaches has increased significantly, as shown by the graph above.
+
+```{r, include=TRUE, echo=FALSE}
+league_averages_rebounds <- league_averages_data %>% 
+  rename(Season = "X.1") %>% 
+  rename(ORB = "X.14") %>% 
+  rename(DRB = "X.15") %>% 
+  rename(TRB = "X.16") %>% 
+  drop_na(Season, ORB, DRB, TRB) %>%
+  select(Season, ORB, DRB, TRB) %>% 
+  filter(Season >= 1974) %>% 
+  mutate(Season = as.double(str_sub(Season, 1, 4)),
+         ORB = as.double(ORB),
+         DRB = as.double(DRB),
+         TRB = as.double(TRB)) %>% 
+  pivot_longer(names_to = "rebound_rate",
+               values_to = "rpg",
+               cols = -Season) %>% 
+  ggplot(mapping = aes(Season, rpg, color = rebound_rate)) + 
+  geom_line() + 
+  theme_minimal() + 
+  scale_color_discrete(name = "Rebound Rate", labels = c("Defensive Rebounds",
+                                                   "Offense Rebounds",
+                                                   "Total Rebounds")) + 
+  labs(title = "Different Average League Rebound Rates Over Time",
+       subtitle = "Over time, the proportion of total rebounds that are offensive have declined at a slight, but steady rate",
+       x = "Season",
+       y = "Average Rebounds Per Game",
+       caption = "Source: Basketball Reference (2021)")
+
+league_averages_rebounds
+```
+
+The graphic above signifies a slight decline in offensive rebound rates over time; however, from the previous plot, we also know there has been an increase in the percentage of points home teams have gained through three-pointers. Therefore, it is plausible that the decrease in offensive rebounds is due to increased floor stretching caused by the increase in three-point play schema usage.
+
+```{r, include=TRUE, echo=FALSE}
+league_averages_other <- league_averages_data %>% 
+  rename(Assists = "X.17") %>% 
+  rename(Steals = "X.18") %>% 
+  rename(Blocks = "X.19") %>% 
+  rename(Season = "X.1") %>% 
+  drop_na() %>% 
+  filter(Season != "NA" && Blocks != "NA" && Assists != "NA" && Steals != "NA") %>% 
+  slice(1:49) %>% 
+  mutate(Season = as.double(str_sub(Season, 1, 4)),
+         Assists = as.double(Assists),
+         Steals = as.double(Steals),
+         Blocks = as.double(Blocks)) %>% 
+  pivot_longer(names_to = "Statistic",
+               values_to = "avg",
+               cols = -Season) %>% 
+  ggplot(mapping = aes(Season, avg, fill = Statistic)) + 
+  geom_col(position = "dodge") + 
+  theme_solarized() + 
+  xlab("\nSeason") + 
+  ylab("Average\n") + 
+  labs(title = "League Averages for Assists, Steals, & Blocks Over Time",
+       subtitle = "put subtitle here",
+       source = "Source: Basketball Reference (2021)")
+
+league_averages_other
+```
+
+Other important statistics for basketball analysis as a whole involve categories such as assists, steals, and blocks, as depicted in the graph above. Although there have been a few minor trends in these areas over time, there isn't really anything too important we need to note down here.
+
+```{r, include=TRUE, echo=FALSE}
+team_data_clean <- nba_team_records_data %>% 
+  select(Year, Team, Record, Winning.Percentage) %>% 
+  mutate(Year = as.double(str_sub(Year, 1, 4))) %>% 
+  mutate(Wins = as.double(str_sub(Record, 1, 2))) %>% 
+  mutate(Losses = as.double(str_sub(Record, 4, 5))) %>% 
+  mutate(Winning.Percentage = as.double(Winning.Percentage)) %>% 
   
-ggplot(data = player_birthplace_data) + 
-  geom_sf(aes(fill = birthPlace))
-  
-player_birthplace_data
+#  look at primer for factor split
+
+# glimpse(team_data_clean)
+
+```
+
 
 ```{r, include=TRUE, echo=FALSE}
 current_player_salary_data <- player_salary_data %>% 

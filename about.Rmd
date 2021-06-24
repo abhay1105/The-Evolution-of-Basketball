@@ -1,7 +1,14 @@
 ---
 title: "About this site"
 description: |
-  Some additional details about the website
+  This analysis is focused on identifying the significant trends that have occurred throughout the history of the game of basketball. By analyzing variables such as TV viewership, three-point shooting, and rebounding, we will be able to conduct a thorough investigation in order to find out how much the sport has changed. <br><br>
+  The sources that allowed me to make this analysis possible include the following: <br>
+  -- "Basketball Database" by Wyatt Walsh on Kaggle <br>
+  -- "NBA Finals Television Ratings" on Wikipedia <br>
+  -- NBA Advanced Stats <br>
+  -- Basketball Reference <br>
+  -- Forbes on Statista <br>
+  -- "NBA Team Records by Year" by Gabe Salzer on data.world
 ---
 
 ```{r setup, include=FALSE}
