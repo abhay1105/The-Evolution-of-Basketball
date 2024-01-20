@@ -1,5 +1,5 @@
 ---
-title: "About this site"
+title: "About"
 description: |
   This analysis is focused on identifying the significant trends that have occurred throughout the history of the game of basketball. By analyzing variables such as TV viewership, three-point shooting, and rebounding, we will be able to conduct a thorough investigation in order to find out how much the sport has changed. <br><br>
   The sources that allowed me to make this analysis possible include the following: <br>

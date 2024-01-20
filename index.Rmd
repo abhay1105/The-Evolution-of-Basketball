@@ -1,12 +1,12 @@
 ---
 title: "The Evolution of Basketball"
 description: |
-  A quick analysis about the noticeable trends in the history of basketball...
+  An analysis about the noticeable trends in the history of basketball.
 site: distill::distill_website
 author:
   - name: Abhay Paidipalli
     url: 
-date: 'June 23rd 2021 (IN PROGRESS)'
+date: 'June 23rd 2021'
 output: distill::distill_article
 ---
 
@@ -51,9 +51,9 @@ txt_size <- 20
 
 ```
 
-The Popularity of the Sport
+**The Popularity of the Sport**
 
-Let's first start by taking a look at the overall popularity of the sport of basketball itself. An easy way for us to do this would be by analyzing some of the viewership statistics. Below, we have a graph that depicts the viewership in millions for the NBA Finals series. It is evident that the viewership reached its peak for the NBA Finals series during the Michael Jordan era of basketball. After that, the viewership declined heavily; however, it looks to be back on the rise again.
+Let's first start by taking a look at the overall popularity of the sport. An easy way for us to do this would be by analyzing some of the viewership statistics. Below, we have a graph that depicts the viewership in millions for the NBA Finals series. It is evident that the viewership reached its peak for the NBA Finals series during the Michael Jordan era of basketball. After that, the viewership declined heavily; however, it looks to be back on the rise again.
 
 ```{r, include=TRUE, echo=FALSE}
 nba_viewership_clean <- read_html("https://en.wikipedia.org/wiki/NBA_Finals_television_ratings") %>% 
@@ -84,9 +84,9 @@ nba_viewership_clean
 
 ```
 
-Moving on, we should also take a look at the reach basketball has on the entire globe. This is important since basketball was only created in 1891, which is pretty late considering other sports like soccer have been around in some fashion since as far back as 2500 BC. <br>
+Moving on, we should also take a look at the reach basketball has on the entire globe. This factor is important to consider since basketball was only created in 1891, which is pretty late in comparison to other sports (sports like soccer have been around in some fashion since as far back as 2500 BC). <br>
 
-Nonetheless, the visualization below allows us to judge this by showing us where the players of the NBA have come from.
+Nonetheless, the visualization below allows us to judge basketball's reach by showing us where the players of the NBA have come from.
 
 ```{r, include=TRUE, echo=FALSE}
 player_birthplace_data <- player_map_data %>% 
@@ -117,7 +117,7 @@ world_nationality_plot <- ggplot() +
   geom_polygon(data = map.world_joined, aes(x = long, y = lat, group = group, fill = total)) +
 #  scale_fill_manual(values = c("#CCCCCC","#e60000")) +
   labs(title = 'Birthplace of NBA Players',
-       subtitle = "Even though the majority of NBA Players have come from the United States, the colored regions show us that a lot of players \nhave also come from several other nations as well",
+       subtitle = "Even though the majority of NBA Players have come from the United States, the colored regions show us that a lot of players \nhave also come from several other nations as well.",
        caption = "Source: NBA Advanced Stats (2021)") +
   theme(text = element_text(family = "Gill Sans", color = "#FFFFFF")
         ,panel.background = element_rect(fill = "#444444")
@@ -137,7 +137,7 @@ world_nationality_plot
 
 ```
 
-Another very important factor when considering the popularity of a sport is its financial value. Since sports are part of the entertainment industry, one of the most telling ways for us to determine its success is to analyze the amount of value they hold. As we can see, the graphic below shows us that although the NBA may not currently be the league with the highest average franchise value, they are one of the leagues with the highest increases, which is a good sign for the future. There are other non-American leagues to consider as well, but for the sake of this analysis will focus more towards the American sports leagues.
+Another very important factor when considering the popularity of a sport is its financial value. Since sports are part of the entertainment industry, one of the most telling ways for us to determine its success is to analyze the amount of value they hold. As we can see, the graphic below shows us that although the NBA may not currently be the league with the highest average franchise value, they are one of the leagues with the highest increases, which is a good sign for the future. There are other non-American leagues to consider as well, but for the sake of this analysis, we will focus more towards the American sports leagues.
 
 ```{r, include=TRUE, echo=FALSE, out.width="90%"}
 sports_league_revenue_clean <- sports_league_revenue_data %>% 
@@ -170,7 +170,7 @@ sports_league_revenue_clean
 
 ```
 
-Statistics of the Game
+**Statistics of the Game**
 
 ```{r, include=TRUE, echo=FALSE}
 three_point_data <- games_data %>% 
@@ -195,7 +195,7 @@ three_point_data
 
 ```
 
-One of the main things that fans mention when asked about some of the biggest advancements in basketball is the evolution of the three-point line. Introduced in 1979, the three-point line has provided players an opportunity to make more points for a made shot than the standard two-point. Since then, the implementation of this three-point line into the gameplan of coaches has increased significantly, as shown by the graph above.
+One of the main things that fans mention when asked about some of the biggest advancements in basketball is the evolution of the three-point line. Introduced in 1979, the three-point line has provided players an opportunity to make more points for a made shot than the standard two-point basket. Since then, the implementation of this three-point line into the game-plans of coaches has increased significantly, as shown by the graph above.
 
 ```{r, include=TRUE, echo=FALSE}
 league_averages_rebounds <- league_averages_data %>% 
@@ -259,9 +259,9 @@ league_averages_other <- league_averages_data %>%
 league_averages_other
 ```
 
-Other important statistics for basketball analysis as a whole involve categories such as assists, steals, and blocks, as depicted in the graph above. Although there have been a few minor trends in these areas over time, there isn't really anything too important we need to note down here. <br>
+Other important statistics for basketball analytics as a whole includes categories such as assists, steals, and blocks, as depicted in the graph above. Although there have been a few minor trends in these areas over time, there isn't really anything too important to note. <br>
 
-Other Trends
+**Other Trends**
 
 ```{r, include=TRUE, echo=FALSE}
 team_data_clean <- nba_team_records_data %>% 
@@ -289,7 +289,7 @@ team_data_clean
 
 ```
 
-The graphic above displays the records of teams across the leagues from different time periods. Although the overall relationship between wins and losses are pretty similar across the time periods, we can see a clear difference in variation among some of the older win-loss records. However, it is to be noted that these observations are not very significant.
+The graphic above displays the records of teams across the leagues from different time periods. Although the overall relationship between wins and losses is pretty similar across the time periods, we can see a clear difference in variation among some of the older win-loss records. However, it is to be noted that these observations are not very significant.
 
 ```{r, include=FALSE, echo=FALSE}
 current_player_salary_data <- player_salary_data %>% 
